@@ -8,9 +8,9 @@ from msdmodule import averaging
 from msdmodule import total_average
 
 # parameters
-num_steps =200
+num_steps =100
 number_particles = 100
-dt = 0.01
+dt = 0.1
 c = 1
 #boundry 
 xmin=-10
@@ -35,6 +35,7 @@ for j in range(number_particles):
         # using Euler method to update the equation
         x[j, i+1] = (x[j, i] + np.sqrt(c * dt) * nx[j, i] - xmin) % (xmax - xmin) + xmin
         y[j, i+1] = (y[j, i] + np.sqrt(c * dt) * ny[j, i] - ymin) % (ymax - ymin) + ymin
+#counting particles in each section
 def Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
     num_particles_insection = np.zeros((number_lignes**2, num_steps))
     for i in range(num_steps):
@@ -43,8 +44,9 @@ def Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, 
             yposition=int((y[j,i]-ymin)/section_length)
             num_particles_insection[xposition * number_lignes + yposition, i] += 1
     return num_particles_insection
+num_particles_insection = Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
 
-#  the distribution difference  
+#  the distribution difference  sqr
 def distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
     number_sections = number_lignes**2
     distribution_diff = np.zeros((number_sections, num_steps))
@@ -54,22 +56,28 @@ def distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_partic
         distribution_diff[:,t] = (distribution_t - distribution_t0)**2
     return distribution_diff
 diff = distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
-# Plot the squared difference of particle distributions for each section
+
+#plotting it
 for i in range(number_sections):
-    plt.plot(range(num_steps), diff[i])   
+    plt.plot(range(num_steps), diff[i]) 
+    
 #the msd that will average on all sections
 def computational_msd(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
     computational_displacement = np.zeros(num_steps)
     for t in range(num_steps):
-        computational_displacement[t] = np.mean(distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)[:, t])
+        computational_displacement[t] = np.mean(distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)[:, t])     
     return computational_displacement
 msd = computational_msd(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
-# the mean squared displacement plot
-plt.plot(range(num_steps), msd,color="black")
+
+# Plot the msd
+plt.plot(range(num_steps), msd,color="black",label="the mean")
 plt.grid()
+plt.legend()
+plt.xlabel("number of steps")
+plt.ylabel("displacement sqr value of distribution ")
+plt.title()
 plt.show()
   
-num_particles_insection = Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
 
 
 """
@@ -91,6 +99,7 @@ fig.suptitle(f"Number of particles in each section through time\n"
              f"The average number of particles in all the sections: {round(total_average(num_particles_insection, num_steps),1)}")
 
 plt.show()
+
 #in case we wwant to animate it to show us the particles moving and it calls a modulus to do so
 #output_path = "/home/elaisati/2D animation.gif"
 #animate_particles(x, y, num_steps,number_particles, xmin, xmax, ymin, ymax, output_path) """

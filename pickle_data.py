@@ -18,11 +18,11 @@ x = np.random.uniform(ymin,ymax,(number_particles, num_steps))
 y = np.random.uniform(ymin,ymax,(number_particles, num_steps))
 
 #creating data
+nx = np.random.normal(loc=0.0, scale=1.0, size=(number_particles,num_steps-1))
+ny = np.random.normal(loc=0.0, scale=1.0, size=(number_particles,num_steps-1))
 
 for j in range(number_particles):
     for i in range(num_steps - 1):
-        nx[j, i] = np.random.normal(loc=0.0, scale=1.0, size=None)
-        ny[j, i] = np.random.normal(loc=0.0, scale=1.0, size=None)
         # using Euler method to update the equation
         x[j, i+1] = (x[j, i] + np.sqrt(c * dt) * nx[j, i] - xmin) % (xmax - xmin) + xmin
         y[j, i+1] = (y[j, i] + np.sqrt(c * dt) * ny[j, i] - ymin) % (ymax - ymin) + ymin

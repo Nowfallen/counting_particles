@@ -1,8 +1,8 @@
 import numpy as np
 import pickle
 # parameters
-num_steps =100
-number_particles = 100
+num_steps =10000
+number_particles = 1000
 dt = 0.1
 c = 1
 #boundry 

@@ -94,3 +94,4 @@ plt.show()
 #in case we wwant to animate it to show us the particles moving and it calls a modulus to do so
 #output_path = "/home/elaisati/2D animation.gif"
 #animate_particles(x, y, num_steps,number_particles, xmin, xmax, ymin, ymax, output_path) """
+

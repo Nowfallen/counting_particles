@@ -4,37 +4,26 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation, PillowWriter
 import math
-from msdmodule import averaging
-from msdmodule import total_average
+from msdmodule import msd_analytic
+import pickle
 
 # parameters
-num_steps =100
-number_particles = 100
-dt = 0.1
-c = 1
+num_steps =10000
+number_particles = 1000
 #boundry 
 xmin=-10
 xmax=10
 ymin=-10
 ymax=10
 number_lignes=2
+D=5
 number_sections = int(math.pow(number_lignes, 2))
 #we will just have to consider it to be cubes for now
 section_length=(xmax-xmin)/number_lignes
-# Initializing steps 
-nx = np.zeros((number_particles, num_steps))
-ny = np.zeros((number_particles, num_steps))
-#intializing positions
-x = np.random.uniform(ymin,ymax,(number_particles, num_steps))
-y = np.random.uniform(ymin,ymax,(number_particles, num_steps))
-# steps
-for j in range(number_particles):
-    for i in range(num_steps - 1):
-        nx[j, i] = np.random.normal(0, 1)
-        ny[j, i] = np.random.normal(0, 1)
-        # using Euler method to update the equation
-        x[j, i+1] = (x[j, i] + np.sqrt(c * dt) * nx[j, i] - xmin) % (xmax - xmin) + xmin
-        y[j, i+1] = (y[j, i] + np.sqrt(c * dt) * ny[j, i] - ymin) % (ymax - ymin) + ymin
+
+#opening the pickle file 
+with open('particle_positions1.pkl', 'rb') as f:
+    x,y= pickle.load(f)
 #counting particles in each section
 def Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
     num_particles_insection = np.zeros((number_lignes**2, num_steps))
@@ -48,34 +37,36 @@ num_particles_insection = Distribution(x, y, xmin, ymin, section_length, num_ste
 
 #  the distribution difference  sqr
 def distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
-    number_sections = number_lignes**2
     distribution_diff = np.zeros((number_sections, num_steps))
-    distribution_t0 = Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)[:,0]
+    distribution_0= num_particles_insection[:,0]
     for t in range(1, num_steps):
-        distribution_t = Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)[:,t-1]
-        distribution_diff[:,t] = (distribution_t - distribution_t0)**2
+        distribution_t = num_particles_insection[:,t-1] 
+        #the code 
+        for k in range (1,t):
+                  distribution_t0=np.mean(num_particles_insection[:,k-1])
+                  distribution_diff[:,t] =(distribution_t-distribution_t0)**2
     return distribution_diff
 diff = distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
-
 #plotting it
 for i in range(number_sections):
     plt.plot(range(num_steps), diff[i]) 
-    
 #the msd that will average on all sections
-def computational_msd(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
+def computational_msd(diff, num_steps):
     computational_displacement = np.zeros(num_steps)
     for t in range(num_steps):
-        computational_displacement[t] = np.mean(distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)[:, t])     
+        computational_displacement[t] = np.mean(diff[:, t])     
     return computational_displacement
-msd = computational_msd(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
 
+msd = computational_msd(diff, num_steps)
+msd_anly=msd_analytic(num_particles_insection, number_sections, num_steps, section_length, D)
 # Plot the msd
 plt.plot(range(num_steps), msd,color="black",label="the mean")
+plt.plot(range(num_steps),msd_anly,'--',color='purple',label='analytic mean')
 plt.grid()
 plt.legend()
 plt.xlabel("number of steps")
 plt.ylabel("displacement sqr value of distribution ")
-plt.title()
+plt.title('msd :distribution of particles in the observed space', color='blue')
 plt.show()
   
 
@@ -103,4 +94,3 @@ plt.show()
 #in case we wwant to animate it to show us the particles moving and it calls a modulus to do so
 #output_path = "/home/elaisati/2D animation.gif"
 #animate_particles(x, y, num_steps,number_particles, xmin, xmax, ymin, ymax, output_path) """
-

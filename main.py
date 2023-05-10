@@ -11,12 +11,12 @@ import pickle
 num_steps =10000
 number_particles = 1000
 #boundry 
-xmin=-10
-xmax=10
-ymin=-10
-ymax=10
-number_lignes=2
-D=5
+xmin=0
+xmax=20
+ymin=0
+ymax=20
+number_lignes=4
+D=0.5
 number_sections = int(math.pow(number_lignes, 2))
 #we will just have to consider it to be cubes for now
 section_length=(xmax-xmin)/number_lignes
@@ -38,30 +38,42 @@ num_particles_insection = Distribution(x, y, xmin, ymin, section_length, num_ste
 #  the distribution difference  sqr
 def distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
     distribution_diff = np.zeros((number_sections, num_steps))
-    distribution_0= num_particles_insection[:,0]
     for t in range(1, num_steps):
         distribution_t = num_particles_insection[:,t-1] 
         #the code 
-        for k in range (1,t):
-                  distribution_t0=np.mean(num_particles_insection[:,k-1])
-                  distribution_diff[:,t] =(distribution_t-distribution_t0)**2
+        for k in range (1,t-1):
+                  distribution_t0=num_particles_insection[:,k]
+                  distribution_diff[:,t] = (distribution_t-distribution_t0)**2
     return distribution_diff
 diff = distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
 #plotting it
+"""
 for i in range(number_sections):
-    plt.plot(range(num_steps), diff[i]) 
+    plt.plot(range(num_steps), diff[i]) """
 #the msd that will average on all sections
 def computational_msd(diff, num_steps):
     computational_displacement = np.zeros(num_steps)
     for t in range(num_steps):
-        computational_displacement[t] = np.mean(diff[:, t])     
+        for k in range(t-1):
+            computational_displacement[t] += np.mean(diff[:, k])
+        computational_displacement[t]/= t
     return computational_displacement
-
+"""
+def computational_msd(diff, num_steps):
+    computational_displacement = np.zeros(num_steps)
+    for t in range(num_steps):
+        for k in range(t): 
+            computational_displacement[k]=np.mean(diff[:,t])
+        computational_displacement[t] = np.mean(diff[:, t])
+        
+    return computational_displacement
+"""
 msd = computational_msd(diff, num_steps)
-msd_anly=msd_analytic(num_particles_insection, number_sections, num_steps, section_length, D)
+msd_anly=msd_analytic( number_sections, num_steps, section_length, D)
+
 # Plot the msd
-plt.plot(range(num_steps), msd,color="black",label="the mean")
-plt.plot(range(num_steps),msd_anly,'--',color='purple',label='analytic mean')
+plt.loglog(range(num_steps), msd,color="black",label="the mean")
+plt.loglog(range(num_steps),msd_anly,color='blue',label='analytic mean')
 plt.grid()
 plt.legend()
 plt.xlabel("number of steps")

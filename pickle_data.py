@@ -3,13 +3,13 @@ import pickle
 # parameters
 num_steps =10000
 number_particles = 1000
-dt = 0.1
+dt = 0.01
 c = 1
 #boundry 
-xmin=-10
-xmax=10
-ymin=-10
-ymax=10
+xmin=0
+xmax=20
+ymin=0
+ymax=20
 # Initializing steps 
 nx = np.zeros((number_particles, num_steps))
 ny = np.zeros((number_particles, num_steps))
@@ -34,4 +34,3 @@ for j in range(number_particles):
     data[f'Particle_{j}'] = {'x': x[j, :], 'y': y[j, :]}
 with open("particle_positions1.pkl", "wb") as f:
     pickle.dump([x,y], f)
-

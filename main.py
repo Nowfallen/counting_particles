@@ -28,16 +28,16 @@ tauDiff= ((xmax-xmin)**2)/4*D
 #opening the pickle file 
 with open('particle_positions1.pkl', 'rb') as f:
     x,y= pickle.load(f)
-#counting particles in each section
-def Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):
+#counting particles in each sub_space
+def fluctuation(x, y, xmin, ymin, section_lengthx,section_lengthy, num_steps, number_particles, number_lignes):
     num_particles_insection = np.zeros((number_lignes**2, num_steps))
     for i in range(num_steps):
         for j in range(number_particles):
-            xposition = int((x[j, i]) / section_length)
-            yposition = int((y[j, i]) / section_length)
+            xposition = int((x[j, i]) / section_lengthx)
+            yposition = int((y[j, i]) / section_lengthy)
             num_particles_insection[xposition * number_lignes + yposition, i] += 1
     return num_particles_insection
-num_particles_insection = Distribution(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes)
+num_particles_insection = (x, y, xmin, ymin, section_lengthx,section_lengthy, num_steps, number_particles, number_lignes)
 
 #  the distribution difference  sqr
 def distribution_diff(x, y, xmin, ymin, section_length, num_steps, number_particles, number_lignes):

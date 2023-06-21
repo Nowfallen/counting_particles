@@ -22,7 +22,7 @@ def fluctuation_diff(x, y, section_lengthx,section_lengthy, num_steps, number_li
         for t0 in range (0, num_steps-delta):
             fluctuation_t0 = num_particles_insection_data[:,t0]
             fluctuation_t = num_particles_insection_data[:,t0 + delta]
-            fluctuation_diff[:,delta] += (distribution_t - distribution_t0)**2
+            fluctuation_diff[:,delta] += (fluctuation_t - fluctuation_t0)**2
             nt0 += 1
         fluctuation_diff[:,delta] /= nt0
     return fluctuation_diff

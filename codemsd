@@ -1,0 +1,31 @@
+#computing
+def compute_r(x, y, num_particles, num_steps):
+    rsquared = np.zeros((num_particles, maxDuration))
+    #locating the data
+    for ipart in range(1, num_particles):
+        # figure out which indices correspond to particle ipart
+        indices = np.where(data['particle_id'] == ipart)[0]
+        xpart= x.iloc[indices].values
+        ypart = y.iloc[indices].values
+        indices = []
+        for delta in range(1, maxDuration):
+            nt0 = 0
+            for t0 in range(0, maxDuration - delta ):
+                #print(t0)
+                displacement_x0 = xpart[t0]
+                displacement_x = xpart[t0 + delta]
+                displacement_y0 = ypart[t0]
+                displacement_y = ypart[t0 + delta]
+                rsquared[ipart,delta] += (((displacement_x - displacement_x0) ** 2)+((displacement_y- displacement_y0) ** 2))
+                #print(rsquared[ipart,delta])
+                nt0 += 1
+            rsquared[ipart, delta]  /= (nt0)
+
+    return rsquared
+rseq = compute_r(x, y, num_particles, num_steps)
+def computational_msd(rseq, maxDuration,num_particles):
+    computational_displacement = np.zeros(maxDuration)
+    for t in range(1,maxDuration):
+        computational_displacement[t] = np.mean(rseq[:, t])
+    return computational_displacement
+msd = computational_msd(rseq, maxDuration,num_particles)
